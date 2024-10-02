@@ -139,10 +139,10 @@ template <typename T, typename Context> class arg_converter {
     if (type_ != 's') operator()<bool>(value);
   }
 
-  template <typename U, FMT_ENABLE_IF(std::is_integral<U>::value)>
-  void operator()(U value) {
+  template <typename UT, FMT_ENABLE_IF(std::is_integral<UT>::value)>
+  void operator()(UT value) {
     bool is_signed = type_ == 'd' || type_ == 'i';
-    using target_type = conditional_t<std::is_same<T, void>::value, U, T>;
+    using target_type = conditional_t<std::is_same<T, void>::value, UT, T>;
     if (const_check(sizeof(target_type) <= sizeof(int))) {
       // Extra casts are used to silence warnings.
       using unsigned_type = typename make_unsigned_or_bool<target_type>::type;
@@ -157,12 +157,12 @@ template <typename T, typename Context> class arg_converter {
       if (is_signed)
         arg_ = static_cast<long long>(value);
       else
-        arg_ = static_cast<typename make_unsigned_or_bool<U>::type>(value);
+        arg_ = static_cast<typename make_unsigned_or_bool<UT>::type>(value);
     }
   }
 
-  template <typename U, FMT_ENABLE_IF(!std::is_integral<U>::value)>
-  void operator()(U) {}  // No conversion needed for non-integral types.
+  template <typename UT, FMT_ENABLE_IF(!std::is_integral<UT>::value)>
+  void operator()(UT) {}  // No conversion needed for non-integral types.
 };
 
 // Converts an integer argument to T for printf, if T is an integral type.

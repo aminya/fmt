@@ -27,7 +27,7 @@ enum class range_format { disabled, map, set, sequence, string, debug_string };
 namespace detail {
 
 template <typename T> class is_map {
-  template <typename U> static auto check(U*) -> typename U::mapped_type;
+  template <typename UT> static auto check(UT*) -> typename UT::mapped_type;
   template <typename> static void check(...);
 
  public:
@@ -36,7 +36,7 @@ template <typename T> class is_map {
 };
 
 template <typename T> class is_set {
-  template <typename U> static auto check(U*) -> typename U::key_type;
+  template <typename UT> static auto check(UT*) -> typename UT::key_type;
   template <typename> static void check(...);
 
  public:
@@ -115,8 +115,8 @@ struct is_range_<T, void>
 
 // tuple_size and tuple_element check.
 template <typename T> class is_tuple_like_ {
-  template <typename U, typename V = typename std::remove_cv<U>::type>
-  static auto check(U* p) -> decltype(std::tuple_size<V>::value, 0);
+  template <typename UT, typename VT = typename std::remove_cv<UT>::type>
+  static auto check(UT* p) -> decltype(std::tuple_size<VT>::value, 0);
   template <typename> static void check(...);
 
  public:
@@ -388,8 +388,8 @@ struct range_formatter<
       detail::string_literal<Char, ']'>{};
   bool is_debug = false;
 
-  template <typename Output, typename It, typename Sentinel, typename U = T,
-            FMT_ENABLE_IF(std::is_same<U, Char>::value)>
+  template <typename Output, typename It, typename Sentinel, typename UT = T,
+            FMT_ENABLE_IF(std::is_same<UT, Char>::value)>
   auto write_debug_string(Output& out, It it, Sentinel end) const -> Output {
     auto buf = basic_memory_buffer<Char>();
     for (; it != end; ++it) buf.push_back(*it);
@@ -399,8 +399,8 @@ struct range_formatter<
         out, basic_string_view<Char>(buf.data(), buf.size()), specs);
   }
 
-  template <typename Output, typename It, typename Sentinel, typename U = T,
-            FMT_ENABLE_IF(!std::is_same<U, Char>::value)>
+  template <typename Output, typename It, typename Sentinel, typename UT = T,
+            FMT_ENABLE_IF(!std::is_same<UT, Char>::value)>
   auto write_debug_string(Output& out, It, Sentinel) const -> Output {
     return out;
   }
@@ -780,7 +780,8 @@ namespace detail {
 // Check if T has an interface like a container adaptor (e.g. std::stack,
 // std::queue, std::priority_queue).
 template <typename T> class is_container_adaptor_like {
-  template <typename U> static auto check(U* p) -> typename U::container_type;
+  template <typename UT>
+  static auto check(UT* p) -> typename UT::container_type;
   template <typename> static void check(...);
 
  public:
